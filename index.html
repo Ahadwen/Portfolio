@@ -121,7 +121,7 @@ body {
   cursor: none; transition: box-shadow 0.2s;
   text-decoration: none; color: inherit; height: 100%;
 }
-.project:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.project-col:hover .project { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 
 .project-visual {
   position: relative; overflow: hidden; background: var(--white);
@@ -132,21 +132,21 @@ body {
   transition: opacity 0.3s ease;
 }
 .project-gif { opacity: 0; }
-.project-visual:hover .project-img { opacity: 0; }
-.project-visual:hover .project-gif { opacity: 1; }
+.project-col.show-gif .project-img { opacity: 0; }
+.project-col.show-gif .project-gif { opacity: 1; }
 
 .project-visual-overlay {
   position: absolute; inset: 0; background: rgba(0,0,0,0);
   display: flex; align-items: center; justify-content: center;
   transition: background 0.2s; z-index: 2;
 }
-.project:hover .project-visual-overlay { background: rgba(0,0,0,0.18); }
+.project-col:hover .project-visual-overlay { background: rgba(0,0,0,0.18); }
 .project-visual-label {
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
   text-transform: uppercase; color: white; opacity: 0;
   transform: translateY(6px); transition: opacity 0.2s, transform 0.2s;
 }
-.project:hover .project-visual-label { opacity: 1; transform: translateY(0); }
+.project-col:hover .project-visual-label { opacity: 1; transform: translateY(0); }
 
 .project-placeholder {
   position: absolute; inset: 0;
@@ -283,27 +283,32 @@ footer {
 .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
 .reveal.visible{opacity:1;transform:translateY(0);}
 
-/* video embed */
+/* gameplay GIF — uses most of the content width; GIF scales down inside box (never stretched past native) */
 .product-video-wrap {
-  padding: 0 48px;
+  padding: 40px 48px;
   border-bottom: 1px solid var(--border);
   background: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .product-video-placeholder {
   position: relative;
-  aspect-ratio: 16/9;
+  width: 100%;
+  max-width: min(1000px, 100%);
+  aspect-ratio: 4/3;
   background: #111;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.product-video-placeholder iframe {
-  position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+.product-video-placeholder img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
-.video-placeholder-label {
-  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.3);
-  letter-spacing: 0.1em; text-align: center; pointer-events: none;
-}
-.product-video-placeholder iframe[src=""] + .video-placeholder-label { display: block; }
-.product-video-placeholder iframe:not([src=""]) + .video-placeholder-label { display: none; }
 
 /* screenshot grid */
 .product-body-full { grid-template-columns: 1fr; }
@@ -327,10 +332,6 @@ footer {
   width: 100%; height: 100%; object-fit: cover;
   display: block;
 }
-.screenshot-caption {
-  font-family: var(--serif); font-size: 13px; font-style: italic;
-  color: var(--text-mid); line-height: 1.65;
-}
 
 @media(max-width:860px){
   .projects{grid-template-columns:1fr;padding:24px;gap:16px;}
@@ -338,6 +339,8 @@ footer {
   .hero{padding:24px;flex-direction:column;}
   footer{padding:20px 24px;}
   .product-hero{grid-template-columns:1fr;padding:40px 24px 32px;gap:24px;}
+  .product-video-wrap{padding:28px 24px;}
+  .product-video-placeholder{max-width:100%;}
   .product-body{grid-template-columns:1fr;}
   .product-section{border-right:none;}
   .product-section:nth-last-child(2){border-bottom:1px solid var(--border);}
@@ -370,7 +373,8 @@ footer {
       <a class="project" href="https://Ahadwen.github.io/Public-CV/" target="_blank">
         <div class="project-visual">
           <div class="project-visual-overlay"><span class="project-visual-label">Open ↗</span></div>
-          <div class="project-placeholder"><span class="placeholder-num">01</span></div>
+          <img class="project-img" src="assets/CV.png" alt="">
+          <img class="project-gif" src="assets/CV.gif" alt="" data-gif-ms="3700" decoding="async">
         </div>
         <div class="project-info">
           <div class="project-type">Interactive CV</div>
@@ -386,7 +390,8 @@ footer {
       <a class="project" href="https://Ahadwen.github.io/Escape-Game/game.html" target="_blank">
         <div class="project-visual">
           <div class="project-visual-overlay"><span class="project-visual-label">Play ↗</span></div>
-          <div class="project-placeholder"><span class="placeholder-num">02</span></div>
+          <img class="project-img" src="assets/Game1.png" alt="">
+          <img class="project-gif" src="assets/Gameplay.gif" alt="" data-gif-ms="10200" decoding="async">
         </div>
         <div class="project-info">
           <div class="project-type">Browser Game</div>
@@ -402,7 +407,8 @@ footer {
       <a class="project" href="https://Ahadwen.github.io/Graphtool" target="_blank">
         <div class="project-visual">
           <div class="project-visual-overlay"><span class="project-visual-label">Open ↗</span></div>
-          <div class="project-placeholder"><span class="placeholder-num">03</span></div>
+          <img class="project-img" src="assets/Graph%201.png" alt="">
+          <img class="project-gif" src="assets/Graph.gif" alt="" data-gif-ms="14000" decoding="async">
         </div>
         <div class="project-info">
           <div class="project-type">Data Tool</div>
@@ -448,16 +454,13 @@ footer {
   </div>
   <div class="product-video-wrap">
     <div class="product-video-placeholder">
-      <!-- Replace src with your unlisted YouTube URL:
-           e.g. https://www.youtube.com/embed/YOUR_VIDEO_ID -->
-      <iframe id="game-video" src="" allowfullscreen></iframe>
-      <div class="video-placeholder-label">Demo video — add YouTube embed URL</div>
+      <img src="assets/Gameplay2.gif" alt="Escape gameplay" loading="lazy">
     </div>
   </div>
   <div class="product-body">
     <div class="product-section">
       <div class="product-section-label">About</div>
-      <p class="product-text">A top-down survival roguelike where you are the prey. Invincible hunters spawn in waves and get faster as they age. Three playable characters — each with a completely different movement mechanic. A card-based item system with four suits, set bonuses, and legendary tier effects.</p>
+      <p class="product-text">A top-down survival roguelike where you are the prey. Procedurally generated worlds, special programmed events and animations, and several playable characters with unique abilities.</p>
       <div class="product-tags">
         <span class="product-tag">Canvas API</span>
         <span class="product-tag">Vanilla JS</span>
@@ -467,7 +470,7 @@ footer {
     </div>
     <div class="product-section">
       <div class="product-section-label">The idea behind it</div>
-      <p class="product-text">I've wanted to build this game for years — the escape fantasy from MOBAs, the dread of roguelikes, combined into something where survival is the whole point. Built it during a job search as a way to actually learn vibe coding by doing something I cared about, rather than following a tutorial.</p>
+      <p class="product-text">I believe that building something actually fun to use, is a great way to practice this skillset. Much better than just following a youtube tutorial. Plus there's a gap in the market for games that give you no chance to fight, but tools with which to embody the art of escape.</p>
     </div>
     <div class="product-section">
       <div class="product-section-label">What went well</div>
@@ -475,7 +478,7 @@ footer {
     </div>
     <div class="product-section">
       <div class="product-section-label">What we learned</div>
-      <p class="product-text">Letting Cursor steer the architecture was an error. AI tooling is an exceptional junior developer — fast, capable, great at executing a clear brief — but it will not design a system unprompted. A month of feature additions produced a 6,000-line file where each character's abilities were implemented as independent occurrences rather than instances of a shared system. The lesson: Plan the architecture at the start, not during.</p>
+      <p class="product-text">Letting Cursor steer the architecture was an error. AI tooling is an exceptional junior developer — fast, capable, great at executing a clear brief — but it will not design an entire system in a scalable manner without guidance. The first iteration was stable but quickly became costly to maintain and update. The lesson: Insist on good architectural practices from day one.</p>
     </div>
   </div>
 </template>
@@ -499,19 +502,16 @@ footer {
           <div class="screenshot-frame">
             <img src="assets/Graph%201.png" alt="Use case 1">
           </div>
-          <p class="screenshot-caption">Quickly plot and explore a dataset without spinning up a proper analytics tool.</p>
         </div>
         <div class="screenshot-slot">
           <div class="screenshot-frame">
             <img src="assets/Graph%202.png" alt="Use case 2">
           </div>
-          <p class="screenshot-caption">Dynamic analysis and decision making.</p>
         </div>
         <div class="screenshot-slot">
           <div class="screenshot-frame">
             <img src="assets/Graph%203.png" alt="Use case 3">
           </div>
-          <p class="screenshot-caption">Export and import resultant data.</p>
         </div>
       </div>
     </div>
@@ -585,17 +585,30 @@ function closeProduct() {
 
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && current === 'product') closeProduct(); });
 
-// gif hover
-document.querySelectorAll('.project-visual').forEach(visual => {
-  const gif = visual.querySelector('.project-gif');
-  if(!gif) return;
-  let played = false, resetTimer;
-  visual.addEventListener('mouseenter', () => {
-    if(played){ const src=gif.src; gif.src=''; gif.src=src; }
-    played=true; clearTimeout(resetTimer);
+// Home tiles: still image → hover plays GIF once → back to still (timing via data-gif-ms; bump if you re-export a GIF)
+document.querySelectorAll('.project-col').forEach(col => {
+  const gif = col.querySelector('.project-gif');
+  if (!gif) return;
+  col.dataset.gifDurationMs = gif.dataset.gifMs || '5000';
+
+  let hideTimer;
+  const baseSrc = (gif.getAttribute('src') || '').split('?')[0];
+
+  col.addEventListener('mouseenter', () => {
+    clearTimeout(hideTimer);
+    col.classList.add('show-gif');
+    gif.src = baseSrc + '?t=' + Date.now();
+    const ms = (parseInt(col.dataset.gifDurationMs, 10) || 5000) + 250;
+    hideTimer = setTimeout(() => {
+      col.classList.remove('show-gif');
+      hideTimer = null;
+    }, ms);
   });
-  visual.addEventListener('mouseleave', () => {
-    resetTimer = setTimeout(()=>{ played=false; }, 200);
+  col.addEventListener('mouseleave', () => {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+    col.classList.remove('show-gif');
+    gif.src = baseSrc;
   });
 });
 </script>
