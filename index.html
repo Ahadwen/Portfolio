@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alastair Hadwen</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ede8e0;
+  --white: #f7f3ec;
+  --border: #d6cfc4;
+  --text: #1c1a16;
+  --text-mid: #6e6860;
+  --text-dim: #a89f94;
+  --accent: #2d6a4f;
+  --display: 'Syne', sans-serif;
+  --serif: 'Lora', serif;
+  --mono: 'DM Mono', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--display);
+  height: 100vh;
+  overflow: hidden;
+  cursor: none;
+}
+
+#cursor {
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: fixed; top:0; left:0;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width 0.18s, height 0.18s;
+}
+#cursor.big { width: 36px; height: 36px; opacity: 0.35; }
+
+/* ── PAGE SYSTEM ── */
+.page {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  overflow-y: auto;
+  transition: transform 0.65s cubic-bezier(0.76,0,0.24,1), opacity 0.65s ease;
+  will-change: transform, opacity;
+}
+.page.hidden-down  { transform: translateY(100vh);  opacity: 0; pointer-events: none; }
+.page.hidden-up    { transform: translateY(-100vh); opacity: 0; pointer-events: none; }
+.page.active       { transform: translate(0,0);     opacity: 1; pointer-events: all; }
+
+/* ── SHARED HEADER ── */
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 48px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); z-index: 10;
+}
+
+.logo {
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; color: var(--text); text-decoration: none;
+}
+
+.header-right { display: flex; align-items: center; gap: 24px; }
+
+.header-link {
+  font-family: var(--mono); font-size: 11px; color: var(--text-mid);
+  text-decoration: none; letter-spacing: 0.06em; transition: color 0.18s;
+}
+.header-link:hover { color: var(--accent); }
+
+.cv-btn {
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  text-decoration: none; letter-spacing: 0.06em;
+  border: 1px solid var(--accent); padding: 7px 16px;
+  transition: background 0.18s, color 0.18s;
+}
+.cv-btn:hover { background: var(--accent); color: var(--white); }
+
+.back-btn {
+  font-family: var(--mono); font-size: 11px; color: var(--text-mid);
+  background: none; border: none; cursor: none; letter-spacing: 0.12em;
+  text-transform: uppercase; transition: color 0.18s; padding: 0;
+}
+.back-btn:hover { color: var(--accent); }
+
+/* ── HERO ── */
+.hero {
+  padding: 32px 48px;
+  display: flex; align-items: baseline; gap: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-title {
+  font-family: var(--display); font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 700; letter-spacing: -0.02em; white-space: nowrap;
+}
+.hero-title em { font-style: normal; color: var(--accent); }
+.hero-desc {
+  font-family: var(--serif); font-size: 13px; font-style: italic;
+  color: var(--text-dim); line-height: 1.6;
+}
+
+/* ── PROJECTS GRID ── */
+.projects {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 24px; padding: 40px 48px;
+  border-bottom: 1px solid var(--border);
+  align-items: stretch;
+}
+
+.project-col { display: flex; flex-direction: column; }
+
+.project {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border); background: var(--white);
+  cursor: none; transition: box-shadow 0.2s;
+  text-decoration: none; color: inherit; height: 100%;
+}
+.project:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.project-visual {
+  position: relative; overflow: hidden; background: var(--white);
+  border-bottom: 1px solid var(--border); aspect-ratio: 4/3; cursor: none;
+}
+.project-img, .project-gif {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+.project-gif { opacity: 0; }
+.project-visual:hover .project-img { opacity: 0; }
+.project-visual:hover .project-gif { opacity: 1; }
+
+.project-visual-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s; z-index: 2;
+}
+.project:hover .project-visual-overlay { background: rgba(0,0,0,0.18); }
+.project-visual-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: white; opacity: 0;
+  transform: translateY(6px); transition: opacity 0.2s, transform 0.2s;
+}
+.project:hover .project-visual-label { opacity: 1; transform: translateY(0); }
+
+.project-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center; background: var(--white);
+}
+.placeholder-num {
+  font-family: var(--display); font-size: 96px; font-weight: 800;
+  color: var(--border); letter-spacing: -0.04em; user-select: none;
+}
+
+.project-info {
+  padding: 28px 28px 20px; flex: 1;
+  display: flex; flex-direction: column; min-height: 140px;
+}
+.project-type {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+}
+.project-title {
+  font-family: var(--display); font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--text); margin-bottom: 10px; line-height: 1.1;
+}
+.project-desc {
+  font-family: var(--serif); font-size: 13px; font-style: italic;
+  color: var(--text-mid); line-height: 1.75; flex: 1;
+}
+
+.learn-more-btn {
+  display: block; width: 100%; padding: 13px 20px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+  background: none; border: 1px solid var(--border); border-top: none;
+  cursor: none; text-align: left; text-decoration: none;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.learn-more-btn:hover { background: var(--accent); color: var(--white); border-color: var(--accent); }
+
+/* ── PRODUCT PAGE ── */
+#product-page { background: var(--white); }
+
+.product-hero {
+  padding: 64px 48px 48px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: end;
+}
+
+.product-eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 20px;
+}
+
+.product-title {
+  font-family: var(--display); font-size: clamp(40px, 5vw, 72px);
+  font-weight: 800; letter-spacing: -0.03em; line-height: 0.95;
+}
+.product-title em { font-style: normal; color: var(--accent); }
+
+.product-hero-right {
+  display: flex; flex-direction: column; gap: 24px;
+}
+
+.product-summary {
+  font-family: var(--serif); font-size: 16px; font-style: italic;
+  color: var(--text-mid); line-height: 1.8;
+}
+
+.product-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 12px; color: var(--accent);
+  text-decoration: none; letter-spacing: 0.06em;
+  border: 1px solid var(--accent); padding: 12px 24px;
+  transition: background 0.18s, color 0.18s; align-self: flex-start;
+}
+.product-cta:hover { background: var(--accent); color: var(--white); }
+
+.product-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.product-section {
+  padding: 48px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.product-section:nth-child(even) { border-right: none; }
+.product-section:last-child { border-bottom: none; }
+.product-section:nth-last-child(2) { border-bottom: none; }
+
+.product-section-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.product-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.product-text {
+  font-family: var(--serif); font-size: 14px; color: var(--text-mid); line-height: 1.85;
+}
+
+.product-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+}
+.product-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--text-mid); border: 1px solid var(--border); padding: 4px 10px;
+}
+
+.use-cases { display: flex; flex-direction: column; }
+.use-case {
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 24px 1fr; gap: 14px; align-items: start;
+}
+.use-case:last-child { border-bottom: none; }
+.use-case-num { font-family: var(--mono); font-size: 11px; color: var(--accent); padding-top: 2px; }
+.use-case-text { font-family: var(--serif); font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+
+/* footer */
+footer {
+  padding: 24px 48px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-name { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
+.footer-email { font-family: var(--mono); font-size: 10px; color: var(--accent); text-decoration: none; letter-spacing: 0.08em; }
+
+/* animations */
+@keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+.fade-up{opacity:0;animation:fadeUp 0.55s ease forwards;}
+.d1{animation-delay:0.05s}.d2{animation-delay:0.15s}.d3{animation-delay:0.25s}.d4{animation-delay:0.35s}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* video embed */
+.product-video-wrap {
+  padding: 0 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--text);
+}
+.product-video-placeholder {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #111;
+  display: flex; align-items: center; justify-content: center;
+}
+.product-video-placeholder iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+}
+.video-placeholder-label {
+  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.1em; text-align: center; pointer-events: none;
+}
+.product-video-placeholder iframe[src=""] + .video-placeholder-label { display: block; }
+.product-video-placeholder iframe:not([src=""]) + .video-placeholder-label { display: none; }
+
+/* screenshot grid */
+.product-body-full { grid-template-columns: 1fr; }
+.product-section-full {
+  grid-column: 1 / -1;
+  border-right: none;
+}
+.product-screenshots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 4px;
+}
+.screenshot-slot { display: flex; flex-direction: column; gap: 12px; }
+.screenshot-placeholder {
+  aspect-ratio: 4/3;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+.screenshot-slot img {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+}
+.screenshot-caption {
+  font-family: var(--serif); font-size: 13px; font-style: italic;
+  color: var(--text-mid); line-height: 1.65;
+}
+
+@media(max-width:860px){
+  .projects{grid-template-columns:1fr;padding:24px;gap:16px;}
+  .site-header{padding:20px 24px;}
+  .hero{padding:24px;flex-direction:column;}
+  footer{padding:20px 24px;}
+  .product-hero{grid-template-columns:1fr;padding:40px 24px 32px;gap:24px;}
+  .product-body{grid-template-columns:1fr;}
+  .product-section{border-right:none;}
+  .product-section:nth-last-child(2){border-bottom:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- ══ HOME PAGE ══ -->
+<div id="home-page" class="page active">
+  <div class="site-header">
+    <span class="logo fade-up d1">Alastair Hadwen</span>
+    <div class="header-right fade-up d2">
+      <a href="mailto:Alastair.Hadwen@gmail.com" class="header-link">alastair.hadwen@gmail.com</a>
+      <a href="https://Ahadwen.github.io/Public-CV/" class="cv-btn">CV →</a>
+    </div>
+  </div>
+
+  <section class="hero fade-up d2">
+    <h1 class="hero-title">Things I've <em>built.</em></h1>
+    <p class="hero-desc">A PM who builds — tools, games, and things that didn't exist before.</p>
+  </section>
+
+  <div class="projects reveal">
+
+    <!-- CV -->
+    <div class="project-col">
+      <a class="project" href="https://Ahadwen.github.io/Public-CV/" target="_blank">
+        <div class="project-visual">
+          <div class="project-visual-overlay"><span class="project-visual-label">Open ↗</span></div>
+          <div class="project-placeholder"><span class="placeholder-num">01</span></div>
+        </div>
+        <div class="project-info">
+          <div class="project-type">Interactive CV</div>
+          <h2 class="project-title">Alastair Hadwen — CV</h2>
+          <p class="project-desc">A CV built as a product. Animated page transitions, scroll-linked effects, a philosophy section.</p>
+        </div>
+      </a>
+      <a class="learn-more-btn" href="https://Ahadwen.github.io/Public-CV/" target="_blank">View CV →</a>
+    </div>
+
+    <!-- GAME -->
+    <div class="project-col">
+      <a class="project" href="https://Ahadwen.github.io/Escape-Game/" target="_blank">
+        <div class="project-visual">
+          <div class="project-visual-overlay"><span class="project-visual-label">Play ↗</span></div>
+          <div class="project-placeholder"><span class="placeholder-num">02</span></div>
+        </div>
+        <div class="project-info">
+          <div class="project-type">Browser Game</div>
+          <h2 class="project-title">Escape</h2>
+          <p class="project-desc">Top-down survival roguelike. You are the prey. Three characters, card-based items, invincible hunters.</p>
+        </div>
+      </a>
+      <button class="learn-more-btn" onclick="openProduct('game')">Learn more →</button>
+    </div>
+
+    <!-- GRAPH TOOL -->
+    <div class="project-col">
+      <a class="project" href="#" target="_blank">
+        <div class="project-visual">
+          <div class="project-visual-overlay"><span class="project-visual-label">Open ↗</span></div>
+          <div class="project-placeholder"><span class="placeholder-num">03</span></div>
+        </div>
+        <div class="project-info">
+          <div class="project-type">Data Tool</div>
+          <h2 class="project-title">Graph Tool</h2>
+          <p class="project-desc">Dynamic data visualisation. Drag nodes, bulk import, export JSON or CSV. Built in an afternoon.</p>
+        </div>
+      </a>
+      <button class="learn-more-btn" onclick="openProduct('graph')">Learn more →</button>
+    </div>
+
+  </div>
+
+  <footer class="reveal">
+    <span class="footer-name">Alastair Hadwen · Berlin · 2026</span>
+    <a href="mailto:Alastair.Hadwen@gmail.com" class="footer-email">Alastair.Hadwen@gmail.com</a>
+  </footer>
+</div>
+
+<!-- ══ PRODUCT PAGE ══ -->
+<div id="product-page" class="page hidden-down">
+  <div class="site-header">
+    <button class="back-btn" onclick="closeProduct()">← Back</button>
+    <div class="header-right">
+      <a href="mailto:Alastair.Hadwen@gmail.com" class="header-link">alastair.hadwen@gmail.com</a>
+      <a href="https://Ahadwen.github.io/Public-CV/" class="cv-btn">CV →</a>
+    </div>
+  </div>
+
+  <div id="product-content"></div>
+</div>
+
+<!-- PRODUCT CONTENT TEMPLATES -->
+<template id="tpl-game">
+  <div class="product-hero">
+    <div>
+      <div class="product-eyebrow">Browser Game</div>
+      <h1 class="product-title">Escape<br><em>— the game</em></h1>
+    </div>
+    <div class="product-hero-right">
+      <p class="product-summary">A top-down survival roguelike where you are the prey. Invincible hunters, three playable characters, and a card-based item system with legendary tier effects.</p>
+      <a href="https://Ahadwen.github.io/Escape-Game/" class="product-cta" target="_blank">Play the game →</a>
+    </div>
+  </div>
+  <div class="product-video-wrap">
+    <div class="product-video-placeholder">
+      <!-- Replace src with your unlisted YouTube URL:
+           e.g. https://www.youtube.com/embed/YOUR_VIDEO_ID -->
+      <iframe id="game-video" src="" allowfullscreen></iframe>
+      <div class="video-placeholder-label">Demo video — add YouTube embed URL</div>
+    </div>
+  </div>
+  <div class="product-body">
+    <div class="product-section">
+      <div class="product-section-label">About</div>
+      <p class="product-text">A top-down survival roguelike where you are the prey. Invincible hunters spawn in waves and get faster as they age. Three playable characters — each with a completely different movement mechanic. A card-based item system with four suits, set bonuses, and legendary tier effects.</p>
+      <div class="product-tags">
+        <span class="product-tag">Canvas API</span>
+        <span class="product-tag">Vanilla JS</span>
+        <span class="product-tag">Vite</span>
+        <span class="product-tag">Game Design</span>
+      </div>
+    </div>
+    <div class="product-section">
+      <div class="product-section-label">The idea behind it</div>
+      <p class="product-text">I've wanted to build this game for years — the escape fantasy from MOBAs, the dread of roguelikes, combined into something where survival is the whole point. Built it during a job search as a way to actually learn vibe coding by doing something I cared about, rather than following a tutorial.</p>
+    </div>
+    <div class="product-section">
+      <div class="product-section-label">What went well</div>
+      <p class="product-text">The iterative build process — starting with a single HTML file, validating the core loop felt good, then layering in complexity. Each feature built on a working foundation. The design thinking was also strong: the prey fantasy, hunter behaviour variations, the card suit system — these were designed before they were built, and held up.</p>
+    </div>
+    <div class="product-section">
+      <div class="product-section-label">What we learned</div>
+      <p class="product-text">Letting Cursor steer the architecture was an error. AI tooling is an exceptional junior developer — fast, capable, great at executing a clear brief — but it will not design a system unprompted. A month of feature additions produced a 6,000-line file where each character's abilities were implemented as independent occurrences rather than instances of a shared system. The lesson: define interfaces before you build, not after.</p>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-graph">
+  <div class="product-hero">
+    <div>
+      <div class="product-eyebrow">Data Tool</div>
+      <h1 class="product-title">Graph<br><em>Tool</em></h1>
+    </div>
+    <div class="product-hero-right">
+      <p class="product-summary">A dynamic data visualisation tool. Drag nodes, bulk import, snap to grid, export as JSON or CSV. Built in an afternoon.</p>
+      <a href="#" class="product-cta" target="_blank">Open tool →</a>
+    </div>
+  </div>
+  <div class="product-body product-body-full">
+    <div class="product-section product-section-full">
+      <div class="product-section-label">Use cases</div>
+      <div class="product-screenshots">
+        <div class="screenshot-slot">
+          <div class="screenshot-placeholder">screenshot 01</div>
+          <!-- <img src="graph-01.jpg" alt="Use case 1"> -->
+          <p class="screenshot-caption">Quickly plot and explore a dataset without spinning up a proper analytics tool.</p>
+        </div>
+        <div class="screenshot-slot">
+          <div class="screenshot-placeholder">screenshot 02</div>
+          <!-- <img src="graph-02.jpg" alt="Use case 2"> -->
+          <p class="screenshot-caption">Map competitive positioning — drop companies onto axes, drag them around, export for a deck.</p>
+        </div>
+        <div class="screenshot-slot">
+          <div class="screenshot-placeholder">screenshot 03</div>
+          <!-- <img src="graph-03.jpg" alt="Use case 3"> -->
+          <p class="screenshot-caption">Stakeholder mapping — visualise influence vs interest, update live in a meeting.</p>
+        </div>
+      </div>
+    </div>
+    <div class="product-section">
+      <div class="product-section-label">About</div>
+      <p class="product-text">Nodes are draggable on the canvas and update the control panel in real time. Supports bulk import via comma-separated lists, snap-to-grid placement, and full JSON/CSV export with axis settings preserved.</p>
+      <div class="product-tags">
+        <span class="product-tag">Canvas API</span>
+        <span class="product-tag">Data Viz</span>
+        <span class="product-tag">Import/Export</span>
+        <span class="product-tag">Vanilla JS</span>
+      </div>
+    </div>
+    <div class="product-section">
+      <div class="product-section-label">How it was built</div>
+      <p class="product-text">Built in a single afternoon in conversation with Claude. Single HTML file, Canvas API for rendering, no dependencies. Demonstrates the kind of productivity tool a PM can now ship independently without an engineering ticket.</p>
+    </div>
+  </div>
+</template>
+
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a, button, .project-visual').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+// scroll reveal
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} });
+}, { threshold: 0.05 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// page transitions
+const pages = {
+  home: document.getElementById('home-page'),
+  product: document.getElementById('product-page'),
+};
+let current = 'home';
+
+function goTo(target, direction) {
+  if(target === current) return;
+  const cur = pages[current], tgt = pages[target];
+  const inClass = direction === 'up' ? 'hidden-up' : 'hidden-down';
+  const outClass = direction === 'up' ? 'hidden-down' : 'hidden-up';
+  tgt.classList.remove('hidden-up','hidden-down');
+  tgt.classList.add(inClass);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    tgt.classList.remove(inClass); tgt.classList.add('active');
+    cur.classList.remove('active'); cur.classList.add(outClass);
+    tgt.scrollTop = 0;
+    current = target;
+  }));
+}
+
+function openProduct(id) {
+  const tpl = document.getElementById(`tpl-${id}`);
+  if(!tpl) return;
+  document.getElementById('product-content').innerHTML = '';
+  document.getElementById('product-content').appendChild(tpl.content.cloneNode(true));
+  goTo('product', 'up');
+}
+
+function closeProduct() {
+  goTo('home', 'down');
+}
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && current === 'product') closeProduct(); });
+
+// gif hover
+document.querySelectorAll('.project-visual').forEach(visual => {
+  const gif = visual.querySelector('.project-gif');
+  if(!gif) return;
+  let played = false, resetTimer;
+  visual.addEventListener('mouseenter', () => {
+    if(played){ const src=gif.src; gif.src=''; gif.src=src; }
+    played=true; clearTimeout(resetTimer);
+  });
+  visual.addEventListener('mouseleave', () => {
+    resetTimer = setTimeout(()=>{ played=false; }, 200);
+  });
+});
+</script>
+</body>
+</html>
