@@ -318,15 +318,14 @@ footer {
   margin-top: 4px;
 }
 .screenshot-slot { display: flex; flex-direction: column; gap: 12px; }
-.screenshot-placeholder {
+.screenshot-frame {
   aspect-ratio: 4/3;
   background: var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-  letter-spacing: 0.1em;
+  overflow: hidden;
 }
-.screenshot-slot img {
-  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+.screenshot-frame img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
 }
 .screenshot-caption {
   font-family: var(--serif); font-size: 13px; font-style: italic;
@@ -497,18 +496,21 @@ footer {
       <div class="product-section-label">Use cases</div>
       <div class="product-screenshots">
         <div class="screenshot-slot">
-          <div class="screenshot-placeholder">screenshot 01</div>
-            <img src="assets/graph1.png" alt="Use case 1">
+          <div class="screenshot-frame">
+            <img src="assets/Graph%201.png" alt="Use case 1">
+          </div>
           <p class="screenshot-caption">Quickly plot and explore a dataset without spinning up a proper analytics tool.</p>
         </div>
         <div class="screenshot-slot">
-          <div class="screenshot-placeholder">screenshot 02</div>
-            <img src="assets/graph2.png" alt="Use case 2">
+          <div class="screenshot-frame">
+            <img src="assets/Graph%202.png" alt="Use case 2">
+          </div>
           <p class="screenshot-caption">Dynamic analysis and decision making.</p>
         </div>
         <div class="screenshot-slot">
-          <div class="screenshot-placeholder">screenshot 03</div>
-            <img src="assets/graph3.png" alt="Use case 3">
+          <div class="screenshot-frame">
+            <img src="assets/Graph%203.png" alt="Use case 3">
+          </div>
           <p class="screenshot-caption">Export and import resultant data.</p>
         </div>
       </div>
