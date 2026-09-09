@@ -322,14 +322,13 @@ a { color: inherit; }
 @media (hover: hover) and (pointer: fine) {
   .tile:not(.tile--flip-x):hover .tile-inner { transform: rotateY(180deg); }
   .tile--flip-x:hover .tile-inner { transform: rotateX(180deg); }
+
+  .tile:focus-visible { outline: 2px solid var(--accent); }
+  .tile:not(.tile--flip-x):focus-visible .tile-inner { transform: rotateY(180deg); }
+  .tile--flip-x:focus-visible .tile-inner { transform: rotateX(180deg); }
 }
 
-.tile:focus-visible {
-  outline: 2px solid var(--accent);
-}
-
-.tile:not(.tile--flip-x):focus-visible .tile-inner { transform: rotateY(180deg); }
-.tile--flip-x:focus-visible .tile-inner { transform: rotateX(180deg); }
+.tile:focus-visible { outline: 2px solid var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .tile-inner { transition: none; transform: none !important; }
@@ -1089,6 +1088,17 @@ a { color: inherit; }
   text-transform: uppercase;
 }
 
+.rb-video {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  border-radius: 10px;
+  background: #000;
+  object-fit: cover;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rb-track { transition: none; }
 }
@@ -1141,6 +1151,33 @@ footer.page-footer a:hover { color: var(--accent); }
   .bento { grid-auto-rows: 150px; }
 
   .tile-face { padding: 1rem; }
+}
+
+/* ---------- Tile flip on touch devices ----------
+   The 3D rotateX/Y flip is a desktop hover trick; on touch it's
+   driven by JS toggling .is-flipped instead of :hover/:focus-visible
+   (which behaves unreliably after a tap on iOS, and was rendering
+   the back face's baked-in counter-rotation without the parent's
+   matching rotation ever applying — hence the mirrored text). Touch
+   gets a plain opacity crossfade instead of a 3D transform, which
+   can't mirror because no rotation is ever applied. Placed last so
+   it wins the cascade over the unconditional .tile-back rules above. */
+@media (hover: none), (pointer: coarse) {
+  .tile-inner { transform: none !important; transition: none; }
+
+  .tile-back {
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+
+  .tile--flip-x .tile-back { transform: none; }
+
+  .tile-front { transition: opacity .25s ease; }
+
+  .tile.is-flipped .tile-back { opacity: 1; pointer-events: auto; }
+  .tile.is-flipped .tile-front { opacity: 0; pointer-events: none; }
 }
 
 </style>
@@ -1960,15 +1997,13 @@ footer.page-footer a:hover { color: var(--accent); }
                 <div class="rb-slide" data-rb-slide>
                   <h4 class="rb-slide-title">Gameplay</h4>
                   <p class="exp-project-seealso">Play the live game <a href="https://ahadwen.github.io/Escape/" target="_blank" rel="noopener">here</a>.</p>
-                  <!-- Placeholder — swap this div for a <video> tag or embed
-                       once screen-capture footage is ready. -->
-                  <div class="rb-video-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M10 8.5v7l6-3.5-6-3.5z" fill="currentColor" stroke="none"/>
-                    </svg>
-                    <span>Gameplay video coming soon</span>
-                  </div>
+                  <!-- Place gameplay.mp4 in the same folder as this HTML
+                       file (next to it in the repo) and this will just
+                       play. Swap the filename below if you name it
+                       differently or put it in a subfolder. -->
+                  <video class="rb-video" autoplay loop muted playsinline>
+                    <source src="assets/gameplay.mp4" type="video/mp4">
+                  </video>
                 </div>
 
                 <div class="rb-slide" data-rb-slide>
@@ -2116,6 +2151,40 @@ footer.page-footer a:hover { color: var(--accent); }
 <!-- /.wrap -->
 
 <script>
+  (function () {
+    // Tap-to-flip for the bento tiles on touch devices. Desktop (real
+    // hover + fine pointer) is left entirely alone — this only runs
+    // when that media query doesn't match, so a mouse click still
+    // navigates immediately as it always has.
+    var tiles = document.querySelectorAll('.tile');
+    var isTouchContext = function () {
+      return !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    };
+
+    tiles.forEach(function (tile) {
+      tile.addEventListener('click', function (e) {
+        if (!isTouchContext()) { return; }
+
+        if (!tile.classList.contains('is-flipped')) {
+          // First tap: focus this card and flip it, deselecting any
+          // other flipped card. Don't navigate yet.
+          e.preventDefault();
+          tiles.forEach(function (t) { t.classList.remove('is-flipped'); });
+          tile.classList.add('is-flipped');
+        }
+        // Already flipped: this tap lands on the back face (the "View
+        // →" prompt), so let the link's default navigation proceed.
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!isTouchContext()) { return; }
+      if (!e.target.closest('.tile')) {
+        tiles.forEach(function (t) { t.classList.remove('is-flipped'); });
+      }
+    });
+  })();
+
   (function () {
     var pages = document.querySelectorAll('.page');
 
