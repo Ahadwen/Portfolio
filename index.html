@@ -106,6 +106,8 @@ a { color: inherit; }
 
 .hero-quals {
   display: inline-flex;
+  flex-wrap: wrap;
+  row-gap: .4rem;
   align-items: center;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -159,6 +161,7 @@ a { color: inherit; }
 
 @media (max-width: 600px) {
   .hero-contact-stack { align-items: flex-start; text-align: left; }
+  .hero-quals { border-radius: 16px; }
 }
 
 /* ---------- Bento grid ----------
@@ -189,6 +192,21 @@ a { color: inherit; }
 .tile--practice   { grid-area: practice; }
 .tile--recommendations { grid-area: rec; }
 .tile--ai         { grid-area: ai; }
+
+@media (max-width: 700px) {
+  .bento {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      "experience"
+      "ai"
+      "practice"
+      "about"
+      "rec";
+    grid-auto-rows: 190px;
+    height: auto;
+  }
+}
 
 .tile {
   display: block;
@@ -1046,6 +1064,31 @@ a { color: inherit; }
   color: var(--ink);
 }
 
+.rb-video-placeholder {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  background: var(--tag-bg);
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  color: var(--ink-soft);
+}
+
+.rb-video-placeholder svg { width: 34px; height: 34px; }
+
+.rb-video-placeholder span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rb-track { transition: none; }
 }
@@ -1067,6 +1110,38 @@ footer.page-footer a {
 }
 
 footer.page-footer a:hover { color: var(--accent); }
+
+/* ---------- Mobile density pass ----------
+   Placed last so it wins the cascade over every base rule
+   above, regardless of source order elsewhere in the file. */
+@media (max-width: 640px) {
+  html { font-size: 12px; }
+
+  .practice-tabs { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+
+  .practice-tab {
+    aspect-ratio: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .7rem;
+    padding: .85rem;
+  }
+
+  .practice-tab-icon { width: 20px; height: 20px; }
+
+  .practice-tab-text { gap: .15rem; }
+
+  .practice-tab-category { font-size: .6rem; }
+
+  .practice-tab-label { font-size: .85rem; }
+
+  .practice-panel { padding: 1.25rem; }
+
+  .bento { grid-auto-rows: 150px; }
+
+  .tile-face { padding: 1rem; }
+}
 
 </style>
 </head>
@@ -1883,6 +1958,20 @@ footer.page-footer a:hover { color: var(--accent); }
               <div class="rb-track" data-rb-track>
 
                 <div class="rb-slide" data-rb-slide>
+                  <h4 class="rb-slide-title">Gameplay</h4>
+                  <p class="exp-project-seealso">Play the live game <a href="https://ahadwen.github.io/Escape/" target="_blank" rel="noopener">here</a>.</p>
+                  <!-- Placeholder — swap this div for a <video> tag or embed
+                       once screen-capture footage is ready. -->
+                  <div class="rb-video-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M10 8.5v7l6-3.5-6-3.5z" fill="currentColor" stroke="none"/>
+                    </svg>
+                    <span>Gameplay video coming soon</span>
+                  </div>
+                </div>
+
+                <div class="rb-slide" data-rb-slide>
                   <h4 class="rb-slide-title">The Situation</h4>
                   <p>Whilst selectively applying to jobs, I wanted to further develop my "vibe coding" toolkit with a project that went deeply beyond the complexity of a feature prototype.</p>
                   <p>I chose game development as a way to experiment with deep, iterative development in the era of AI — designing a game I'd actually enjoy playing myself (a challenging isometric roguelike survival game).</p>
@@ -1911,7 +2000,7 @@ footer.page-footer a:hover { color: var(--accent); }
                 <div class="rb-slide" data-rb-slide>
                   <h4 class="rb-slide-title">The Outcome</h4>
                   <p>Changes are now far faster and far cheaper, which let me get to a stable version.</p>
-                  <p>The game is playable via <a href="https://ahadwen.github.io/Portfolio/" target="_blank" rel="noopener">GitHub Pages here</a>. Fair warning: it's very challenging by design — frequent death and deep replayability are very much the expectation of the genre.</p>
+                  <p>The game is playable via <a href="https://ahadwen.github.io/Escape/" target="_blank" rel="noopener">GitHub Pages here</a>. Fair warning: it's very challenging by design — frequent death and deep replayability are very much the expectation of the genre.</p>
                 </div>
 
               </div>
