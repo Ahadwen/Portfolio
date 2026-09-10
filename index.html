@@ -1997,10 +1997,9 @@ footer.page-footer a:hover { color: var(--accent); }
                 <div class="rb-slide" data-rb-slide>
                   <h4 class="rb-slide-title">Gameplay</h4>
                   <p class="exp-project-seealso">Play the live game <a href="https://ahadwen.github.io/Escape/" target="_blank" rel="noopener">here</a>.</p>
-                  <!-- Place gameplay.mp4 in the same folder as this HTML
-                       file (next to it in the repo) and this will just
-                       play. Swap the filename below if you name it
-                       differently or put it in a subfolder. -->
+                  <!-- Place gameplay.mp4 in an "assets" folder next to
+                       this HTML file (i.e. assets/gameplay.mp4 in the
+                       repo) and this will just play. -->
                   <video class="rb-video" autoplay loop muted playsinline>
                     <source src="assets/gameplay.mp4" type="video/mp4">
                   </video>
@@ -2188,7 +2187,7 @@ footer.page-footer a:hover { color: var(--accent); }
   (function () {
     var pages = document.querySelectorAll('.page');
 
-    function showPage(id) {
+    function showPage(id, tabId) {
       var found = false;
       pages.forEach(function (p) {
         var match = p.id === id;
@@ -2197,18 +2196,29 @@ footer.page-footer a:hover { color: var(--accent); }
       });
       if (!found) {
         pages.forEach(function (p) { p.hidden = p.id !== 'home'; });
+        id = 'home';
       }
       window.scrollTo(0, 0);
-      if (id === 'practice') {
-        document.querySelectorAll('[data-rb-slider]').forEach(function (s) {
-          if (s.__rbSetHeight) { s.__rbSetHeight(); }
+
+      // Harmless no-op on pages without any slider — __rbSetHeight
+      // itself skips anything still hidden.
+      document.querySelectorAll('[data-rb-slider]').forEach(function (s) {
+        if (s.__rbSetHeight) { s.__rbSetHeight(); }
+      });
+
+      if (tabId) {
+        requestAnimationFrame(function () {
+          var activePage = document.getElementById(id);
+          var tabBtn = activePage && activePage.querySelector('.practice-tab[data-tab="' + tabId + '"]');
+          if (tabBtn) { tabBtn.click(); }
         });
       }
     }
 
     function route() {
-      var id = location.hash.replace('#', '') || 'home';
-      showPage(id);
+      var raw = location.hash.replace('#', '') || 'home';
+      var parts = raw.split('/');
+      showPage(parts[0], parts[1]);
     }
 
     window.addEventListener('hashchange', route);
@@ -2240,6 +2250,17 @@ footer.page-footer a:hover { color: var(--accent); }
           if (activeSlider) {
             if (activeSlider.__rbGoTo) { activeSlider.__rbGoTo(0); }
             if (activeSlider.__rbSetHeight) { activeSlider.__rbSetHeight(); }
+          }
+
+          // Reflect this selection in the URL (replace, not push, so
+          // clicking around doesn't spam the back button) — whatever
+          // tab is currently showing is then a copyable, shareable link.
+          var pageEl = tabsRow.closest('.page');
+          if (pageEl && window.history && history.replaceState) {
+            var newHash = '#' + pageEl.id + '/' + target;
+            if (location.hash !== newHash) {
+              history.replaceState(null, '', newHash);
+            }
           }
 
           // Bring this tab row to the top of the viewport (with a
